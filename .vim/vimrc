@@ -1,0 +1,246 @@
+" A lot of this has been *cough* borrowed *cough* from Gary Bernhardt.
+
+" Basic Settings {{{
+" Use Vim settings, rather then Vi settings (much better!).
+" This must be first, because it changes other options as a side effect.
+set nocompatible
+
+" Allow backgrounding buffers without writing them, and remember marks/undo
+" for backgrounded buffers
+set hidden
+
+" Remember more commands and search history
+set history=1000
+" Make tab completion for files/buffers act like bash
+set wildmenu
+
+" Make searches case-sensitive only if they contain upper-case characters
+set ignorecase
+set smartcase
+
+" Keep more context when scrolling off the end of a buffer
+set scrolloff=3
+
+" Store temporary files in a central spot
+set backupdir=~/.vim-tmp,~/.tmp,~/tmp,/var/tmp,/tmp
+set directory=~/.vim-tmp,~/.tmp,~/tmp,/var/tmp,/tmp
+
+" allow backspacing over everything in insert mode
+set backspace=indent,eol,start
+
+set ruler		" show the cursor position all the time
+set showcmd		" display incomplete commands
+set relativenumber
+set numberwidth=4
+set wrap
+set t_Co=256
+
+set foldlevelstart=0
+" Switch syntax highlighting on, when the terminal has colors
+" Also switch on highlighting the last used search pattern.
+if &t_Co > 2 || has("gui_running")
+    syntax on
+    set guifont=Inconsolata-dz:h14
+endif
+
+:color github
+if &diff
+   color simplediff
+endif
+"}}}
+
+call pathogen#infect()
+
+" Filetype Settings {{{
+if has("autocmd")
+    " Enable file type detection.
+    " Use the default filetype settings, so that mail gets 'tw' set to 72,
+    " 'cindent' is on in C files, etc.
+    " Also load indent files, to automatically do language-dependent indenting.
+    filetype plugin indent on
+
+    " Put these in an autocmd group, so that we can delete them easily.
+    augroup general
+        au!
+
+        " For all text files set 'textwidth' to 78 characters.
+        autocmd FileType text setlocal textwidth=78
+
+        " When editing a file, always jump to the last known cursor position.
+        " Don't do it when the position is invalid or when inside an event handler
+        " (happens when dropping a file on gvim).
+        autocmd BufReadPost *
+                    \ if line("'\"") > 0 && line("'\"") <= line("$") |
+                    \   exe "normal g`\"" |
+                    \ endif
+
+    augroup END
+
+    augroup filetype_vim
+        au!
+        au FileType vim setlocal foldmethod=marker
+    augroup END
+
+    augroup workadayfiletypes
+        autocmd!
+        autocmd BufRead,BufNewFile *.sass setfiletype sass
+        autocmd BufRead,BufNewFile *.thor set filetype=ruby
+        autocmd BufRead,BufNewFile *.tt set filetype=ruby
+
+        autocmd BufRead *.mkd,*.md,*.markdown  set ai formatoptions=tcroqn2 comments=n:&gt;
+        "autoindent with two spaces, always expand tabs
+        autocmd FileType ruby,thor,haml,eruby,yaml,html,javascript,sass,cucumber set ai sw=2 sts=2 et
+    augroup END
+
+    augroup commenting
+        autocmd FileType ruby,python nnoremap <buffer> <localleader>c I#
+        autocmd FileType javascript,php nnoremap <buffer> <localleader>c I//
+    augroup END
+
+    augroup snippets
+        :autocmd FileType ruby iabbrev <buffer> def def<cr>end<up>
+        :autocmd FileType ruby iabbrev <buffer> descr describe do<cr>end<up><right><right><right><right><right>
+        :autocmd FileType python iabbrev <buffer> iff if:<left>
+        :autocmd FileType html iabbrev <buffer> --- &mdash;
+    augroup END
+
+    augroup training
+        :autocmd FileType ruby iabbrev <buffer> describe I FORBID YOU TO DO THAT!
+    augroup END
+else
+    " always set autoindenting on
+    set autoindent
+endif
+"}}}
+
+" editing configuration {{{
+set expandtab
+set tabstop=4
+set shiftwidth=4
+set softtabstop=4
+set autoindent
+set laststatus=2
+set showmatch
+set incsearch
+set list listchars=tab:\ \ ,trail:·
+set winwidth=84
+" Adjust the vertical split so the non-current windows minimize.
+" We have to have a winheight bigger than we want to set winminheight. But if
+" we set winheight to be huge before winminheight, the winminheight set will
+" fail.
+set winheight=6
+set winminheight=6
+set winheight=999
+
+" highlighting search
+set hls
+" highlight current line
+set cursorline
+
+set cmdheight=2
+set switchbuf=useopen
+" Always show tab bar
+set showtabline=2
+
+if has("gui_running")
+    " window size
+    :set lines=100
+    :set columns=171
+endif
+"}}}
+
+" Mappings {{{
+let mapleader=","
+let maplocalleader=","
+
+" clear the search buffer when hitting return
+:nnoremap <CR> :nohlsearch<cr>
+" delete trailing whitespace
+:nnoremap W :%s/ *$//g<cr><c-o><cr>
+:nnoremap <leader>- ddp
+:nnoremap <leader>_ ddkP
+" uppercase current word in insert mode
+:inoremap <c-u> <esc>viwUe<esc>a
+:nnoremap <leader><c-u> viwU
+:nnoremap <leader>ev :vsplit $MYVIMRC<cr>
+:nnoremap <leader>sv :source $MYVIMRC<cr>
+:nnoremap <leader>c :CoffeeRun<cr>
+
+:nnoremap <leader><leader> <c-^>
+:cnoremap %% <C-R>=expand('%:h').'/'<cr>
+
+" surround highlighted text with double quotes
+:vnoremap <leader>" di""<esc>hpl
+:inoremap <c-c> <esc>
+:inoremap <esc> <nop>
+" act inside next parentheses/brackets (same line)
+:onoremap in( :<c-u>normal! f(vi(<cr>
+:onoremap il( :<c-u>normal! F)vi(<cr>
+:onoremap in{ :<c-u>normal! f{vi{<cr>
+:onoremap il{ :<c-u>normal! F}vi{<cr>
+
+" }}}
+
+" Navigation {{{
+map <leader>f :CommandTFlush<cr>\|:CommandT<cr>
+"}}}
+
+" Running tests {{{
+function! RunTests(filename)
+    " Write the file and run tests for the given filename
+    :w
+    :silent !echo;echo;echo;echo;echo
+    if filereadable("script/test")
+        exec ":!script/test " . a:filename
+    else
+        exec ":!bundle exec rspec " . a:filename
+    end
+endfunction
+
+function! SetTestFile()
+    " Set the spec file that tests will be run for.
+    let t:current_test_file=@%
+endfunction
+
+function! RunTestFile(...)
+    if a:0
+        let command_suffix = a:1
+    else
+        let command_suffix = ""
+    endif
+
+    " Run the tests for the previously-marked file.
+    let in_spec_file = match(expand("%"), '_spec.rb$') != -1
+    if in_spec_file
+        call SetTestFile()
+    elseif !exists("t:current_test_file")
+        return
+    end
+    call RunTests(t:current_test_file . command_suffix)
+endfunction
+
+function! RunNearestTest()
+    let spec_line_number = line('.')
+    call RunTestFile(":" . spec_line_number)
+endfunction
+
+"function! ApproveDiff()
+"    let file1 = expand("%")
+"    :x
+"    let file2 = expand("%")
+"    let command = ''
+"    if match(file1, 'approved.txt$') != -1
+"        let command = ":!" . a:file2 . " " . a:file1
+"    else
+"        let command = ":!" . a:file1 . " " . a:file2
+"    end
+"    echo command
+"    :x
+"endfunction
+
+map <leader>t :call RunTestFile()<cr>
+map <leader>T :call RunNearestTest()<cr>
+map <leader>a :call RunTests('spec')<cr>
+map <leader>v :!approvals verify -a<cr>
+"map <leader>n :call ApproveDiff()<cr>
+"}}}
