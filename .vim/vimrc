@@ -1,41 +1,47 @@
-" A lot of this has been *cough* borrowed *cough* from Gary Bernhardt.
-
-" Basic Settings {{{
-" Use Vim settings, rather then Vi settings (much better!).
-" This must be first, because it changes other options as a side effect.
 set nocompatible
+syntax on
+filetype plugin indent on
 
 " Allow backgrounding buffers without writing them, and remember marks/undo
 " for backgrounded buffers
 set hidden
 
-" Remember more commands and search history
-set history=1000
 " Make tab completion for files/buffers act like bash
 set wildmenu
 
-" Make searches case-sensitive only if they contain upper-case characters
-set ignorecase
-set smartcase
+" show line numbers
+set nu
 
-" Keep more context when scrolling off the end of a buffer
-set scrolloff=3
-
-" Store temporary files in a central spot
-set backupdir=~/.vim-tmp,~/.tmp,~/tmp,/var/tmp,/tmp
-set directory=~/.vim-tmp,~/.tmp,~/tmp,/var/tmp,/tmp
-
-" allow backspacing over everything in insert mode
-set backspace=indent,eol,start
-
+set autoindent
 set ruler		" show the cursor position all the time
 set showcmd		" display incomplete commands
-set relativenumber
 set numberwidth=4
 set wrap
 set t_Co=256
+set showmatch
+set incsearch
+set winwidth=84
+" highlighting search
+set hls
+" highlight current line
+set cursorline
+set cmdheight=2
+" Always show tab bar
+set showtabline=2
+" show whitespace
+set list listchars=tab:\ \ ,trail:·
 
-set foldlevelstart=0
+let mapleader=","
+
+:nnoremap <leader><leader> <c-^>
+
+" disable escape (force use of <C-c>)
+:inoremap <esc> <nop>
+" make C-c act like esc for stuff like :normal I
+:inoremap <C-c> <esc>
+" disable backspace (force use of <C-h>, and <C-w>)
+:inoremap <bs> <nop>
+
 " Switch syntax highlighting on, when the terminal has colors
 " Also switch on highlighting the last used search pattern.
 if &t_Co > 2 || has("gui_running")
@@ -47,145 +53,29 @@ endif
 if &diff
    color simplediff
 endif
-"}}}
 
-call pathogen#infect()
+highlight ExtraWhitespace ctermbg=196 guibg=#FF1100 ctermfg=white guifg=white
+match ExtraWhitespace /\s\+$/
+autocmd BufWinEnter * match ExtraWhitespace /\s\+$/
+autocmd InsertEnter * match ExtraWhitespace /\s\+\%#\@<!$/
+autocmd InsertLeave * match ExtraWhitespace /\s\+$/
 
-" Filetype Settings {{{
-if has("autocmd")
-    " Enable file type detection.
-    " Use the default filetype settings, so that mail gets 'tw' set to 72,
-    " 'cindent' is on in C files, etc.
-    " Also load indent files, to automatically do language-dependent indenting.
-    filetype plugin indent on
-
-    " Put these in an autocmd group, so that we can delete them easily.
-    augroup general
-        au!
-
-        " For all text files set 'textwidth' to 78 characters.
-        autocmd FileType text setlocal textwidth=78
-
-        " When editing a file, always jump to the last known cursor position.
-        " Don't do it when the position is invalid or when inside an event handler
-        " (happens when dropping a file on gvim).
-        autocmd BufReadPost *
-                    \ if line("'\"") > 0 && line("'\"") <= line("$") |
-                    \   exe "normal g`\"" |
-                    \ endif
-
-    augroup END
-
-    augroup filetype_vim
-        au!
-        au FileType vim setlocal foldmethod=marker
-    augroup END
-
-    augroup workadayfiletypes
-        autocmd!
-        autocmd BufRead,BufNewFile *.sass setfiletype sass
-        autocmd BufRead,BufNewFile *.thor set filetype=ruby
-        autocmd BufRead,BufNewFile *.tt set filetype=ruby
-
-        autocmd BufRead *.mkd,*.md,*.markdown  set ai formatoptions=tcroqn2 comments=n:&gt;
-        "autoindent with two spaces, always expand tabs
-        autocmd FileType ruby,thor,haml,eruby,yaml,html,javascript,sass,cucumber set ai sw=2 sts=2 et
-    augroup END
-
-    augroup commenting
-        autocmd FileType ruby,python nnoremap <buffer> <localleader>c I#
-        autocmd FileType javascript,php nnoremap <buffer> <localleader>c I//
-    augroup END
-
-    augroup snippets
-        :autocmd FileType ruby iabbrev <buffer> def def<cr>end<up>
-        :autocmd FileType ruby iabbrev <buffer> descr describe do<cr>end<up><right><right><right><right><right>
-        :autocmd FileType python iabbrev <buffer> iff if:<left>
-        :autocmd FileType html iabbrev <buffer> --- &mdash;
-    augroup END
-
-    augroup training
-        :autocmd FileType ruby iabbrev <buffer> describe I FORBID YOU TO DO THAT!
-    augroup END
-else
-    " always set autoindenting on
-    set autoindent
-endif
-"}}}
-
-" editing configuration {{{
-set expandtab
-set tabstop=4
-set shiftwidth=4
-set softtabstop=4
-set autoindent
-set laststatus=2
-set showmatch
-set incsearch
-set list listchars=tab:\ \ ,trail:·
-set winwidth=84
-" Adjust the vertical split so the non-current windows minimize.
-" We have to have a winheight bigger than we want to set winminheight. But if
-" we set winheight to be huge before winminheight, the winminheight set will
-" fail.
-set winheight=6
-set winminheight=6
-set winheight=999
-
-" highlighting search
-set hls
-" highlight current line
-set cursorline
-
-set cmdheight=2
-set switchbuf=useopen
-" Always show tab bar
-set showtabline=2
-
-if has("gui_running")
-    " window size
-    :set lines=100
-    :set columns=171
-endif
-"}}}
-
-" Mappings {{{
-let mapleader=","
-let maplocalleader=","
-
-" clear the search buffer when hitting return
 :nnoremap <CR> :nohlsearch<cr>
-" delete trailing whitespace
+" clear the search buffer when hitting return
 :nnoremap W :%s/ *$//g<cr><c-o><cr>
-:nnoremap <leader>- ddp
-:nnoremap <leader>_ ddkP
-" uppercase current word in insert mode
-:inoremap <c-u> <esc>viwUe<esc>a
-:nnoremap <leader><c-u> viwU
-:nnoremap <leader>ev :vsplit $MYVIMRC<cr>
-:nnoremap <leader>sv :source $MYVIMRC<cr>
-:nnoremap <leader>c :CoffeeRun<cr>
 
-:nnoremap <leader><leader> <c-^>
-:cnoremap %% <C-R>=expand('%:h').'/'<cr>
+if has("autocmd")
+  autocmd FileType text setlocal textwidth=78
+  autocmd FileType ruby,yaml,javascript set autoindent expandtab sts=2 sw=2 ts=2
+  autocmd BufReadPost *
+    \ if line("'\"") > 0 && line("'\"") <= line("$") |
+    \   exe "normal g`\"" |
+    \ endif
+endif
 
-" surround highlighted text with double quotes
-:vnoremap <leader>" di""<esc>hpl
-:inoremap <c-c> <esc>
-:inoremap <esc> <nop>
-" act inside next parentheses/brackets (same line)
-:onoremap in( :<c-u>normal! f(vi(<cr>
-:onoremap il( :<c-u>normal! F)vi(<cr>
-:onoremap in{ :<c-u>normal! f{vi{<cr>
-:onoremap il{ :<c-u>normal! F}vi{<cr>
-
-" }}}
-
-" Navigation {{{
+:nnoremap <leader>t :!rspec %<cr>
 map <leader>f :CommandTFlush<cr>\|:CommandT<cr>
-"}}}
 
-" Running tests {{{
 function! RunTests(filename)
     " Write the file and run tests for the given filename
     :w
@@ -193,7 +83,7 @@ function! RunTests(filename)
     if filereadable("script/test")
         exec ":!script/test " . a:filename
     else
-        exec ":!bundle exec rspec " . a:filename
+        exec ":!rspec " . a:filename
     end
 endfunction
 
@@ -219,28 +109,19 @@ function! RunTestFile(...)
     call RunTests(t:current_test_file . command_suffix)
 endfunction
 
-function! RunNearestTest()
-    let spec_line_number = line('.')
-    call RunTestFile(":" . spec_line_number)
-endfunction
-
-"function! ApproveDiff()
-"    let file1 = expand("%")
-"    :x
-"    let file2 = expand("%")
-"    let command = ''
-"    if match(file1, 'approved.txt$') != -1
-"        let command = ":!" . a:file2 . " " . a:file1
-"    else
-"        let command = ":!" . a:file1 . " " . a:file2
-"    end
-"    echo command
-"    :x
-"endfunction
-
 map <leader>t :call RunTestFile()<cr>
-map <leader>T :call RunNearestTest()<cr>
-map <leader>a :call RunTests('spec')<cr>
-map <leader>v :!approvals verify -a<cr>
-"map <leader>n :call ApproveDiff()<cr>
-"}}}
+
+function! PromoteToLet()
+  :normal! dd
+" :exec '?^\s*it\>'
+  :normal! P
+  :.s/\(\w\+\) = \(.*\)$/let(:\1) { \2 }/
+  :normal ==
+endfunction
+:command! PromoteToLet :call PromoteToLet()
+:map <leader>p :PromoteToLet<cr>
+
+
+" Store temporary files in a central spot
+set backupdir=~/.vim-tmp,~/.tmp,~/tmp,/var/tmp,/tmp
+set directory=~/.vim-tmp,~/.tmp,~/tmp,/var/tmp,/tmp
