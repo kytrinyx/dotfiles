@@ -1,0 +1,11 @@
+What does the following output?
+$ tput colors
+(it should output 256)
+
+How about this one?
+echo $TERM
+
+Inside vim, try this:
+:runtime syntax/colortest.vim
+(if lightred and red look the same, 256 colors isn't working)
+

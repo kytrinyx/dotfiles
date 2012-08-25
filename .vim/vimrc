@@ -6,8 +6,14 @@ filetype plugin indent on
 " for backgrounded buffers
 set hidden
 
+" remember more commands and search history
+set history=10000
+
 " Make tab completion for files/buffers act like bash
 set wildmenu
+
+" This makes RVM work inside Vim. Thank you, Gary Bernhardt.
+set shell=bash
 
 " show line numbers
 set nu
@@ -17,7 +23,6 @@ set ruler		" show the cursor position all the time
 set showcmd		" display incomplete commands
 set numberwidth=4
 set wrap
-set t_Co=256
 set showmatch
 set incsearch
 set winwidth=84
@@ -42,14 +47,12 @@ let mapleader=","
 " disable backspace (force use of <C-h>, and <C-w>)
 :inoremap <bs> <nop>
 
-" Switch syntax highlighting on, when the terminal has colors
 " Also switch on highlighting the last used search pattern.
 if &t_Co > 2 || has("gui_running")
-    syntax on
     set guifont=Inconsolata-dz:h14
 endif
 
-:color github
+:color grb256
 if &diff
    color simplediff
 endif
@@ -120,6 +123,8 @@ function! PromoteToLet()
 endfunction
 :command! PromoteToLet :call PromoteToLet()
 :map <leader>p :PromoteToLet<cr>
+
+:map <leader>v :!approvals verify -d vimdiff -a<cr>
 
 
 " Store temporary files in a central spot
