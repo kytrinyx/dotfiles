@@ -1,0 +1,5 @@
+#!/bin/sh
+
+# .git/hooks/post-commit
+
+imagesnap -q $HOME/.gitshots/$(date -j -f "%a %b %d %T %Z %Y" "`date`" "+%s")_$(basename `pwd`).jpg &
