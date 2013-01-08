@@ -12,7 +12,6 @@ set history=10000
 " Make tab completion for files/buffers act like bash
 set wildmenu
 
-" This makes RVM work inside Vim. Thank you, Gary Bernhardt.
 set shell=bash
 
 " show line numbers
@@ -47,12 +46,7 @@ let mapleader=","
 " disable backspace (force use of <C-h>, and <C-w>)
 :inoremap <bs> <nop>
 
-" Also switch on highlighting the last used search pattern.
-if &t_Co > 2 || has("gui_running")
-    set guifont=Inconsolata-dz:h14
-endif
-
-:color grb256
+:color tir_black
 if &diff
    color simplediff
 endif
@@ -79,40 +73,6 @@ endif
 :nnoremap <leader>t :!rspec %<cr>
 map <leader>f :CommandTFlush<cr>\|:CommandT<cr>
 
-function! RunTests(filename)
-    " Write the file and run tests for the given filename
-    :w
-    :silent !echo;echo;echo;echo;echo
-    if filereadable("script/test")
-        exec ":!script/test " . a:filename
-    else
-        exec ":!rspec " . a:filename
-    end
-endfunction
-
-function! SetTestFile()
-    " Set the spec file that tests will be run for.
-    let t:current_test_file=@%
-endfunction
-
-function! RunTestFile(...)
-    if a:0
-        let command_suffix = a:1
-    else
-        let command_suffix = ""
-    endif
-
-    " Run the tests for the previously-marked file.
-    let in_spec_file = match(expand("%"), '_spec.rb$') != -1
-    if in_spec_file
-        call SetTestFile()
-    elseif !exists("t:current_test_file")
-        return
-    end
-    call RunTests(t:current_test_file . command_suffix)
-endfunction
-
-map <leader>t :call RunTestFile()<cr>
 
 function! PromoteToLet()
   :normal! dd
@@ -125,7 +85,6 @@ endfunction
 :map <leader>p :PromoteToLet<cr>
 
 :map <leader>v :!approvals verify -d vimdiff -a<cr>
-
 
 " Store temporary files in a central spot
 set backupdir=~/.vim-tmp,~/.tmp,~/tmp,/var/tmp,/tmp
