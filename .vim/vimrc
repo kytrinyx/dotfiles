@@ -24,7 +24,7 @@ set numberwidth=4
 set wrap
 set showmatch
 set incsearch
-set winwidth=84
+" set winwidth=84
 " highlighting search
 set hls
 " highlight current line
@@ -47,6 +47,7 @@ let mapleader=","
 :inoremap <bs> <nop>
 
 :color tir_black
+":color github
 if &diff
    color simplediff
 endif
@@ -62,8 +63,11 @@ autocmd InsertLeave * match ExtraWhitespace /\s\+$/
 :nnoremap W :%s/ *$//g<cr><c-o><cr>
 
 if has("autocmd")
-  autocmd FileType text setlocal textwidth=78
+  autocmd BufRead,BufNewFile *.go set filetype=go autoread
+
+  autocmd FileType text,markdown,md setlocal textwidth=78
   autocmd FileType ruby,yaml,javascript set autoindent expandtab sts=2 sw=2 ts=2
+  autocmd Filetype gitcommit setlocal spell textwidth=72
   autocmd BufReadPost *
     \ if line("'\"") > 0 && line("'\"") <= line("$") |
     \   exe "normal g`\"" |
@@ -72,8 +76,11 @@ endif
 
 :nnoremap <leader>t :!rspec %<cr>
 map <leader>f :CommandTFlush<cr>\|:CommandT<cr>
+map <leader>r :!gofmt -w %<cr>
+map <leader>g :!go run %<cr>
+map <leader>v :!approvals verify -d vimdiff -a<cr>
 
-
+" Courtesy of Gary Bernhardt
 function! PromoteToLet()
   :normal! dd
 " :exec '?^\s*it\>'
@@ -83,8 +90,6 @@ function! PromoteToLet()
 endfunction
 :command! PromoteToLet :call PromoteToLet()
 :map <leader>p :PromoteToLet<cr>
-
-:map <leader>v :!approvals verify -d vimdiff -a<cr>
 
 " Store temporary files in a central spot
 set backupdir=~/.vim-tmp,~/.tmp,~/tmp,/var/tmp,/tmp
