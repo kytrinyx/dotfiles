@@ -64,9 +64,12 @@ autocmd InsertLeave * match ExtraWhitespace /\s\+$/
 
 if has("autocmd")
   autocmd BufRead,BufNewFile *.go set filetype=go autoread
+  autocmd BufRead,BufNewFile *.md,*.markdown set filetype=md autoread
+  autocmd BufRead,BufNewFile *.html set filetype=html autoread
+  autocmd BufRead,BufNewFile *.erb set filetype=html autoread
 
-  autocmd FileType text,markdown,md setlocal textwidth=78
-  autocmd FileType ruby,yaml,javascript set autoindent expandtab sts=2 sw=2 ts=2
+  autocmd FileType text,md setlocal spell textwidth=78
+  autocmd FileType ruby,yaml,javascript,erb,html set autoindent expandtab sts=2 sw=2 ts=2
   autocmd Filetype gitcommit setlocal spell textwidth=72
   autocmd BufReadPost *
     \ if line("'\"") > 0 && line("'\"") <= line("$") |
@@ -74,8 +77,6 @@ if has("autocmd")
     \ endif
 endif
 
-:nnoremap <leader>t :!rspec %<cr>
-map <leader>f :CommandTFlush<cr>\|:CommandT<cr>
 map <leader>r :!gofmt -w %<cr>
 map <leader>g :!go run %<cr>
 map <leader>v :!approvals verify -d vimdiff -a<cr>
