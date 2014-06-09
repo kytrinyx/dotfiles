@@ -1,0 +1,16 @@
+# Navigation
+# set editing-mode vi
+
+# Unicode
+set convert-meta off
+set input-meta on
+set output-meta on
+
+# Miscellaneous options
+set bell-style visible
+set horizontal-scroll-mode off
+set mark-directories on
+set match-hidden-files on
+
+# Fixes alt-space generating invalid Unicode space on OS X
+" ": beginning-of-line
