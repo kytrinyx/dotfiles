@@ -16,7 +16,7 @@ set shell=bash
 
 " show both line numbers and relative line numbers
 set nu
-set rnu
+"set rnu
 
 set autoindent
 set ruler		" show the cursor position all the time
@@ -73,19 +73,28 @@ autocmd BufWinEnter * match ExtraWhitespace /\s\+$/
 autocmd InsertEnter * match ExtraWhitespace /\s\+\%#\@<!$/
 autocmd InsertLeave * match ExtraWhitespace /\s\+$/
 
-" clear the search buffer when hitting return
-:nnoremap <CR> :nohlsearch<cr>
+" clear the search buffer
+:nnoremap ,h :nohlsearch<cr>
 :nnoremap W :%s/ *$//g<cr><c-o><cr>:nohlsearch<cr>
 
 if has("autocmd")
   autocmd BufRead,BufNewFile *.go set filetype=go sts=2 sw=2 ts=2 autoread
   autocmd BufRead,BufNewFile *.md,*.markdown set filetype=md autoread
-  autocmd BufRead,BufNewFile *.html set filetype=html autoread
-  autocmd BufRead,BufNewFile *.erb set filetype=html autoread
+  autocmd BufRead,BufNewFile *.html,*.hb,*.us,*.erb set filetype=html autoread
+  autocmd BufRead,BufNewFile *.feature set filetype=gherkin autoread
+  autocmd BufNewFile,BufRead *.coffee set filetype=coffee
+  autocmd BufNewFile,BufRead *.js set filetype=javascript
+
+  au! Syntax gherkin source ~/.vim/syntax/cucumber.vim
+
+  autocmd FileType go au BufWritePre <buffer> Fmt
+  let g:gofmt_command = "goimports"
 
   autocmd FileType text setlocal spell textwidth=78
-  autocmd FileType ruby,yaml,javascript,erb,html set autoindent expandtab sts=2 sw=2 ts=2
+  autocmd FileType ruby,yaml,javascript,erb,html,gherkin,coffee set autoindent expandtab sts=2 sw=2 ts=2
   autocmd Filetype gitcommit setlocal spell textwidth=72
+  autocmd Filetype css setlocal autoindent expandtab sts=2 sw=2 ts=2 autoread
+  autocmd Filetype java setlocal autoindent expandtab sts=4 sw=4 ts=4 autoread
   autocmd BufReadPost *
     \ if line("'\"") > 0 && line("'\"") <= line("$") |
     \   exe "normal g`\"" |
