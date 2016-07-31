@@ -2,6 +2,8 @@ set nocompatible
 syntax on
 filetype plugin indent on
 
+execute pathogen#infect()
+
 " Allow backgrounding buffers without writing them, and remember marks/undo
 " for backgrounded buffers
 set hidden
@@ -39,7 +41,7 @@ set list listchars=tab:\ \ ,trail:·
 set statusline=%f
 set statusline+=%y
 
-set runtimepath+=$GOROOT/misc/vim
+set runtimepath+=$GOPATH/src/golang.org/x/tools/cmd/
 
 let mapleader=","
 
@@ -75,23 +77,26 @@ autocmd InsertLeave * match ExtraWhitespace /\s\+$/
 
 " clear the search buffer
 :nnoremap ,h :nohlsearch<cr>
-:nnoremap W :%s/ *$//g<cr><c-o><cr>:nohlsearch<cr>
+:nnoremap ,w :%s/ *$//g<cr><c-o><cr>:nohlsearch<cr>
 
 if has("autocmd")
   autocmd BufRead,BufNewFile *.go set filetype=go sts=2 sw=2 ts=2 autoread
   autocmd BufRead,BufNewFile *.md,*.markdown set filetype=md autoread
-  autocmd BufRead,BufNewFile *.html,*.hb,*.us,*.erb set filetype=html autoread
+  autocmd BufRead,BufNewFile *.erb set filetype=erb autoread
+  autocmd BufRead,BufNewFile *.html set filetype=html autoread
   autocmd BufRead,BufNewFile *.feature set filetype=gherkin autoread
   autocmd BufNewFile,BufRead *.coffee set filetype=coffee
   autocmd BufNewFile,BufRead *.js set filetype=javascript
 
   au! Syntax gherkin source ~/.vim/syntax/cucumber.vim
 
-  autocmd FileType go au BufWritePre <buffer> Fmt
-  let g:gofmt_command = "goimports"
+  " autocmd FileType go au BufWritePre <buffer> Fmt
+  let g:go_fmt_command = "goimports"
+  let g:go_fmt_autosave = 1
 
   autocmd FileType text setlocal spell textwidth=78
-  autocmd FileType ruby,yaml,javascript,erb,html,gherkin,coffee set autoindent expandtab sts=2 sw=2 ts=2
+  autocmd FileType ruby,yaml,javascript,erb,html,gherkin,coffee,scss set autoindent expandtab sts=2 sw=2 ts=2
+  autocmd FileType html set autoindent expandtab sts=2 sw=2 ts=2
   autocmd Filetype gitcommit setlocal spell textwidth=72
   autocmd Filetype css setlocal autoindent expandtab sts=2 sw=2 ts=2 autoread
   autocmd Filetype java setlocal autoindent expandtab sts=4 sw=4 ts=4 autoread
@@ -101,7 +106,6 @@ if has("autocmd")
     \ endif
 endif
 
-map <leader>r :!gofmt -w %<cr>
 map <leader>g :!go run %<cr>
 map <leader>v :!approvals verify -d vimdiff -a<cr>
 
